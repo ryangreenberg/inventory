@@ -6,18 +6,18 @@
 <body>
 
   <ul id="items">
-    {% for item in items %}
+    {% for item in items -%}
       <li>
         <dl>
-          {% for column in columns %}
-            {% if item[column] != null %}
+          {%- for column in columns -%}
+            {%- if item[column] != null -%}
               <dt>{{ column }}</dt>
               <dd>{{ item[column] }}</dd>
-            {% endif %}
-          {% endfor %}
+            {%- endif -%}
+          {%- endfor -%}
         </dl>
       </li>
-    {% endfor %}
+    {%- endfor %}
   </ul>
 
 </body>
