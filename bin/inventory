@@ -7,6 +7,16 @@ require 'byebug'
 
 USAGE = "Usage: inventory <data.csv>"
 
+# Copied from https://github.com/Shopify/liquid/issues/216#issuecomment-54634503
+def preprocess_liquid(text)
+  text.to_s
+    .gsub(/\{#.*?#\}/m, '')          # remove single-line & multiline {# comments #}
+    .gsub(/[ \t]*\{\%-/, '{%')       # trim spaces/tabs before {%-
+    .gsub(/-\%\}[ \t]*\r?\n?/, '%}') # trim spaces/tabs + newline after -%}
+    .gsub(/[ \t]*\{\{-/, '{{')       # trim spaces/tabs before {{-
+    .gsub(/-\}\}[ \t]*\r?\n?/, '}}') # trim spaces/tabs + newline after -}}
+end
+
 def main(args)
   file = ARGV.last
   abort(USAGE) unless file
@@ -16,7 +26,8 @@ def main(args)
   items = data.map(&:to_hash)
 
   template_path = File.expand_path('../../template/inventory.liquid.html', __FILE__)
-  template = Liquid::Template.parse(File.read(template_path), :error_mode => :strict)
+  preprocessed_template = preprocess_liquid(File.read(template_path))
+  template = Liquid::Template.parse(preprocessed_template, :error_mode => :strict)
   puts template.render('items' => items, 'columns' => columns)
 end
 
