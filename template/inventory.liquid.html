@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title }}</title>
+</head>
+<body>
+
+  <ul id="items">
+    {% for item in items %}
+      <li>
+        <dl>
+          {% for column in columns %}
+            {% if item[column] != null %}
+              <dt>{{ column }}</dt>
+              <dd>{{ item[column] }}</dd>
+            {% endif %}
+          {% endfor %}
+        </dl>
+      </li>
+    {% endfor %}
+  </ul>
+
+</body>
+</html>
