@@ -1,3 +1,23 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'csv'
+require 'liquid'
+require 'byebug'
+
+USAGE = "Usage: inventory <data.csv>"
+
+def main(args)
+  file = ARGV.last
+  abort(USAGE) unless file
+
+  data = CSV.read(file, :headers => true)
+  columns = data.headers
+  items = data.map(&:to_hash)
+
+  template_path = File.expand_path('../../template/inventory.liquid.html', __FILE__)
+  template = Liquid::Template.parse(File.read(template_path), :error_mode => :strict)
+  puts template.render('items' => items, 'columns' => columns)
+end
+
+main(ARGV) if __FILE__ == $PROGRAM_NAME
