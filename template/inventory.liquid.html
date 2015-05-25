@@ -2,12 +2,32 @@
 <html>
 <head>
   <title>{{ title }}</title>
+  <style>
+  @media print {
+    .item {
+      page-break-after: always;
+    }
+  }
+
+  ul {
+    list-style-type: none;
+  }
+
+  dt {
+    font-weight: 700;
+    float: left;
+    padding-right: 10px;
+  }
+  dt:after {
+    content: ":";
+  }
+  </style>
 </head>
 <body>
 
   <ul id="items">
     {% for item in items -%}
-      <li>
+      <li class="item">
         <h2>{{ item["Description"] }}</h2>
         <dl>
           {%- for column in columns -%}
