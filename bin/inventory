@@ -24,11 +24,12 @@ def main(args)
   data = CSV.read(file, :headers => true)
   columns = data.headers
   items = data.map(&:to_hash)
+  title = "Inventory #{Time.now.strftime("%Y-%m-%d")}"
 
   template_path = File.expand_path('../../template/inventory.liquid.html', __FILE__)
   preprocessed_template = preprocess_liquid(File.read(template_path))
   template = Liquid::Template.parse(preprocessed_template, :error_mode => :strict)
-  puts template.render('items' => items, 'columns' => columns)
+  puts template.render('items' => items, 'columns' => columns, 'title' => title)
 end
 
 main(ARGV) if __FILE__ == $PROGRAM_NAME
