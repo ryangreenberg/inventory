@@ -9,7 +9,7 @@
     }
   }
 
-  ul {
+  #items {
     list-style-type: none;
   }
 
@@ -25,9 +25,15 @@
 </head>
 <body>
 
+  <ul id="toc">
+  {% for item in items -%}
+    <li><a href="#item-{{ forloop.index }}">{{ item["Description"] }}</a></li>
+  {%- endfor %}
+  </ul>
+
   <ul id="items">
     {% for item in items -%}
-      <li class="item">
+      <li id="item-{{ forloop.index }}" class="item">
         <h2>{{ item["Description"] }}</h2>
         <dl>
           {%- for column in columns -%}
