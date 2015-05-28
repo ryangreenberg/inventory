@@ -4,6 +4,7 @@ require 'bundler/setup'
 require 'csv'
 require 'optparse'
 require 'liquid'
+require 'pdfkit'
 require 'byebug'
 
 USAGE = "Usage: inventory [options] <file.csv>"
@@ -19,10 +20,16 @@ def preprocess_liquid(text)
 end
 
 def parse_options(args)
-  options = {}
+  options = {
+    :format => "html"
+  }
 
   parser = OptionParser.new do |opts|
     opts.banner = USAGE
+
+    opts.on("--format=[FORMAT]", "Output format (html, pdf)") do |format|
+      options[:format] = format
+    end
   end
   options[:remaining_args] = parser.parse(args)
 
@@ -42,7 +49,16 @@ def main(args)
   template_path = File.expand_path('../../template/inventory.liquid.html', __FILE__)
   preprocessed_template = preprocess_liquid(File.read(template_path))
   template = Liquid::Template.parse(preprocessed_template, :error_mode => :strict)
-  puts template.render('items' => items, 'columns' => columns, 'title' => title)
+  html = template.render('items' => items, 'columns' => columns, 'title' => title)
+
+  if options[:format] == "html"
+    puts html
+  elsif options[:format] == "pdf"
+    kit = PDFKit.new(html, :page_size => 'Letter')
+    puts kit.to_pdf
+  else
+    abort("Unknown format '#{options[:format]}'")
+  end
 end
 
 main(ARGV) if __FILE__ == $PROGRAM_NAME
