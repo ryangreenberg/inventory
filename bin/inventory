@@ -2,10 +2,11 @@
 
 require 'bundler/setup'
 require 'csv'
+require 'optparse'
 require 'liquid'
 require 'byebug'
 
-USAGE = "Usage: inventory <data.csv>"
+USAGE = "Usage: inventory [options] <file.csv>"
 
 # Copied from https://github.com/Shopify/liquid/issues/216#issuecomment-54634503
 def preprocess_liquid(text)
@@ -17,8 +18,20 @@ def preprocess_liquid(text)
     .gsub(/-\}\}[ \t]*\r?\n?/, '}}') # trim spaces/tabs + newline after -}}
 end
 
+def parse_options(args)
+  options = {}
+
+  parser = OptionParser.new do |opts|
+    opts.banner = USAGE
+  end
+  options[:remaining_args] = parser.parse(args)
+
+  options
+end
+
 def main(args)
-  file = ARGV.last
+  options = parse_options(args)
+  file = options[:remaining_args].first
   abort(USAGE) unless file
 
   data = CSV.read(file, :headers => true)
