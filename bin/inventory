@@ -54,7 +54,7 @@ def main(args)
   if options[:format] == "html"
     puts html
   elsif options[:format] == "pdf"
-    kit = PDFKit.new(html, :page_size => 'Letter')
+    kit = PDFKit.new(html, :page_size => 'Letter', :print_media_type => true)
     puts kit.to_pdf
   else
     abort("Unknown format '#{options[:format]}'")
