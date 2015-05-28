@@ -2,10 +2,12 @@
 
 require 'bundler/setup'
 require 'csv'
+require 'optparse'
 require 'liquid'
+require 'pdfkit'
 require 'byebug'
 
-USAGE = "Usage: inventory <data.csv>"
+USAGE = "Usage: inventory [options] <file.csv>"
 
 # Copied from https://github.com/Shopify/liquid/issues/216#issuecomment-54634503
 def preprocess_liquid(text)
@@ -17,8 +19,26 @@ def preprocess_liquid(text)
     .gsub(/-\}\}[ \t]*\r?\n?/, '}}') # trim spaces/tabs + newline after -}}
 end
 
+def parse_options(args)
+  options = {
+    :format => "html"
+  }
+
+  parser = OptionParser.new do |opts|
+    opts.banner = USAGE
+
+    opts.on("--format=[FORMAT]", "Output format (html, pdf)") do |format|
+      options[:format] = format
+    end
+  end
+  options[:remaining_args] = parser.parse(args)
+
+  options
+end
+
 def main(args)
-  file = ARGV.last
+  options = parse_options(args)
+  file = options[:remaining_args].first
   abort(USAGE) unless file
 
   data = CSV.read(file, :headers => true)
@@ -29,7 +49,16 @@ def main(args)
   template_path = File.expand_path('../../template/inventory.liquid.html', __FILE__)
   preprocessed_template = preprocess_liquid(File.read(template_path))
   template = Liquid::Template.parse(preprocessed_template, :error_mode => :strict)
-  puts template.render('items' => items, 'columns' => columns, 'title' => title)
+  html = template.render('items' => items, 'columns' => columns, 'title' => title)
+
+  if options[:format] == "html"
+    puts html
+  elsif options[:format] == "pdf"
+    kit = PDFKit.new(html, :page_size => 'Letter', :print_media_type => true)
+    puts kit.to_pdf
+  else
+    abort("Unknown format '#{options[:format]}'")
+  end
 end
 
 main(ARGV) if __FILE__ == $PROGRAM_NAME
